@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tennis Match Organizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input[type="text"], input[type="date"], input[type="time"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #5c6bc0;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #3f51b5;
+        }
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8eaf6;
+            border-radius: 4px;
+        }
+        #matchList {
+            margin-top: 20px;
+        }
+        .match-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tennis Match Organizer</h1>
+        <div id="organizerForm">
+            <input type="text" id="organizerName" placeholder="Enter your name (Organizer)">
+            <button onclick="startMatch()">Start New Match</button>
+        </div>
+        <div id="playerForm" style="display:none;">
+            <input type="text" id="player2" placeholder="Player 2 Name">
+            <input type="text" id="player3" placeholder="Player 3 Name">
+            <input type="text" id="player4" placeholder="Player 4 Name">
+            <input type="date" id="matchDate">
+            <input type="time" id="matchTime">
+            <button onclick="finalizeMatch()">Finalize Match</button>
+        </div>
+        <div id="message"></div>
+        <div id="matchList"></div>
+    </div>
+
+    <script>
+        let players = JSON.parse(localStorage.getItem('players')) || [];
+        let matches = JSON.parse(localStorage.getItem('matches')) || [];
+
+        function startMatch() {
+            const organizerName = document.getElementById('organizerName').value;
+            if (organizerName) {
+                addPlayer(organizerName);
+                document.getElementById('organizerForm').style.display = 'none';
+                document.getElementById('playerForm').style.display = 'block';
+                setMessage(`New match started by ${organizerName}`);
+            } else {
+                setMessage('Please enter your name.');
+            }
+        }
+
+        function addPlayer(name) {
+            if (!players.includes(name)) {
+                players.push(name);
+                localStorage.setItem('players', JSON.stringify(players));
+            }
+        }
+
+        function finalizeMatch() {
+            const organizer = document.getElementById('organizerName').value;
+            const player2 = document.getElementById('player2').value;
+            const player3 = document.getElementById('player3').value;
+            const player4 = document.getElementById('player4').value;
+            const date = document.getElementById('matchDate').value;
+            const time = document.getElementById('matchTime').value;
+
+            if (organizer && player2 && player3 && player4 && date && time) {
+                addPlayer(player2);
+                addPlayer(player3);
+                addPlayer(player4);
+
+                const match = { organizer, player2, player3, player4, date, time };
+                matches.push(match);
+                localStorage.setItem('matches', JSON.stringify(matches));
+
+                setMessage('Match organized successfully!');
+                resetForm();
+                displayMatches();
+            } else {
+                setMessage('Please fill in all fields.');
+            }
+        }
+
+        function setMessage(msg) {
+            document.getElementById('message').textContent = msg;
+        }
+
+        function resetForm() {
+            document.getElementById('organizerForm').style.display = 'block';
+            document.getElementById('playerForm').style.display = 'none';
+            document.getElementById('organizerName').value = '';
+            document.getElementById('player2').value = '';
+            document.getElementById('player3').value = '';
+            document.getElementById('player4').value = '';
+            document.getElementById('matchDate').value = '';
+            document.getElementById('matchTime').value = '';
+        }
+
+        function displayMatches() {
+            const matchList = document.getElementById('matchList');
+            matchList.innerHTML = '<h2>Organized Matches</h2>';
+            matches.forEach((match, index) => {
+                const matchItem = document.createElement('div');
+                matchItem.classList.add('match-item');
+                matchItem.innerHTML = `
+                    <strong>Match ${index + 1}</strong><br>
+                    Date: ${match.date} Time: ${match.time}<br>
+                    Organizer: ${match.organizer}<br>
+                    Players: ${match.player2}, ${match.player3}, ${match.player4}
+                `;
+                matchList.appendChild(matchItem);
+            });
+        }
+
+        displayMatches();
+    </script>
+</body>
+</html>
